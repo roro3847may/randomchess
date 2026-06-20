@@ -59,6 +59,28 @@ class RouletteChessGame {
         return pool;
     }
 
+    isSquareAttacked(r, c, attackerColor) {
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                let p = this.board[row][col];
+                if (p && p.color === attackerColor) {
+                    if (p.type === 'Pawn') {
+                        let dir = attackerColor === 'W' ? -1 : 1;
+                        if (row + dir === r && (col - 1 === c || col + 1 === c)) {
+                            return true;
+                        }
+                    } else {
+                        let moves = this.getLegalMoves(row, col, true);
+                        if (moves.some(m => m.r === r && m.c === c)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     getLegalMoves(r, c, ignoreCastling = false) {
         let moves = [];
         let piece = this.board[r][c];
@@ -147,16 +169,25 @@ class RouletteChessGame {
                 if (r === kingRow && c === 4) {
                     let kingMoved = this.moveHistory.some(h => h.from.r === kingRow && h.from.c === 4 && h.piece.type === 'King');
                     if (!kingMoved) {
+                        let enemyColor = color === 'W' ? 'B' : 'W';
                         if (this.board[kingRow][7] && this.board[kingRow][7].type === 'Rook' && this.board[kingRow][7].color === color) {
                             let rMoved = this.moveHistory.some(h => h.from.r === kingRow && h.from.c === 7 && h.piece.type === 'Rook');
                             if (!rMoved && !this.board[kingRow][5] && !this.board[kingRow][6]) {
-                                moves.push({r: kingRow, c: 7, isCastling: 'short'});
+                                if (!this.isSquareAttacked(kingRow, 4, enemyColor) &&
+                                    !this.isSquareAttacked(kingRow, 5, enemyColor) &&
+                                    !this.isSquareAttacked(kingRow, 6, enemyColor)) {
+                                    moves.push({r: kingRow, c: 7, isCastling: 'short'});
+                                }
                             }
                         }
                         if (this.board[kingRow][0] && this.board[kingRow][0].type === 'Rook' && this.board[kingRow][0].color === color) {
                             let lMoved = this.moveHistory.some(h => h.from.r === kingRow && h.from.c === 0 && h.piece.type === 'Rook');
                             if (!lMoved && !this.board[kingRow][1] && !this.board[kingRow][2] && !this.board[kingRow][3]) {
-                                moves.push({r: kingRow, c: 0, isCastling: 'long'});
+                                if (!this.isSquareAttacked(kingRow, 4, enemyColor) &&
+                                    !this.isSquareAttacked(kingRow, 3, enemyColor) &&
+                                    !this.isSquareAttacked(kingRow, 2, enemyColor)) {
+                                    moves.push({r: kingRow, c: 0, isCastling: 'long'});
+                                }
                             }
                         }
                     }
