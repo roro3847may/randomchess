@@ -1,0 +1,68 @@
+* { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { margin: 0; padding: 0; background-color: #2b2b2b; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+
+#lobby-container { text-align: center; background: #3c3f41; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+#lobby-container h1 { font-size: 2.5rem; margin-top: 0; color: #f2da0a; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+.lobby-controls { display: flex; flex-direction: column; gap: 20px; margin-top: 30px; }
+button { padding: 12px 24px; font-size: 1.1rem; border: none; border-radius: 6px; cursor: pointer; transition: 0.2s; font-weight: bold; }
+button:hover { filter: brightness(1.1); }
+button:active { filter: brightness(0.9); transform: scale(0.98); }
+#btn-create-room { background-color: #4CAF50; color: white; }
+.join-section { display: flex; gap: 10px; justify-content: center; }
+#input-room-code { padding: 10px; font-size: 1.2rem; text-transform: uppercase; width: 150px; text-align: center; border-radius: 6px; border: 1px solid #555; background: #2b2b2b; color: white; }
+#btn-join-room { background-color: #2196F3; color: white; }
+.error { color: #ff4646; font-weight: bold; min-height: 24px; margin: 0; }
+.donation { margin-top: 40px; border-top: 1px solid #555; padding-top: 20px; }
+.donate-btn { display: inline-block; padding: 10px 20px; background-color: #ff4757; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; transition: 0.2s; }
+.donate-btn:hover { background-color: #ff6b81; }
+
+#game-container { display: flex; flex-direction: column; width: 100%; max-width: 1200px; padding: 20px; }
+.header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #444; padding-bottom: 10px; }
+.header h2 { margin: 0; font-size: 1.5rem; color: #ddd; }
+
+.main-content { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
+
+.board-wrapper { flex: 0 0 auto; }
+#chessboard { display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); width: 80vw; max-width: 600px; height: 80vw; max-height: 600px; border: 4px solid #333; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); user-select: none; }
+.square { display: flex; justify-content: center; align-items: center; position: relative; cursor: pointer; }
+.square.light { background-color: #eed2aa; }
+.square.dark { background-color: #905c3f; }
+.square.selected { background-color: rgba(135, 206, 250, 0.7); }
+.square.legal-hint::after { content: ''; width: 25%; height: 25%; background-color: rgba(0, 0, 0, 0.2); border-radius: 50%; position: absolute; }
+.square.legal-hint.capture::after { width: 80%; height: 80%; background-color: transparent; border: 4px solid rgba(0, 0, 0, 0.2); }
+
+.piece { width: 80%; height: 80%; background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 2; pointer-events: none; }
+
+.ui-panel { flex: 1 1 300px; min-width: 250px; background: #3c3f41; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+.turn-indicator h3 { margin: 0; font-size: 1.8rem; text-align: center; }
+.btn-spin { background-color: #009688; color: white; padding: 15px; font-size: 1.2rem; }
+.btn-spin:disabled { background-color: #666; cursor: not-allowed; }
+.roulette-slots { display: flex; gap: 10px; justify-content: space-between; }
+.slot { flex: 1; background: #f1f1f1; color: #333; text-align: center; padding: 15px 0; font-size: 1.5rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 3px solid transparent; }
+.slot:hover { background: #fff; }
+.slot.selected { border-color: #f2da0a; background: #fffde7; transform: scale(1.05); }
+
+.status-msg { text-align: center; font-size: 1.2rem; font-weight: bold; min-height: 1.5em; }
+
+#promotion-panel h4 { margin: 0 0 10px 0; text-align: center; }
+.promo-buttons { display: flex; gap: 5px; justify-content: space-between; }
+.btn-promo { flex: 1; background: #fff; color: #000; font-size: 1.2rem; padding: 10px 0; }
+
+.chat-container { margin-top: auto; border: 1px solid #555; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; height: 200px; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 10px; background: #2b2b2b; font-size: 0.9rem; }
+.chat-msg { margin-bottom: 5px; }
+.chat-msg .sender { font-weight: bold; color: #aaa; margin-right: 5px; }
+.chat-input-area { display: flex; background: #444; }
+#chat-input { flex: 1; border: none; padding: 10px; background: transparent; color: white; outline: none; }
+#btn-send-chat { background: #555; border-radius: 0; padding: 10px 15px; font-size: 0.9rem; }
+
+.donation-small { text-align: center; font-size: 0.9rem; }
+.donation-small a { color: #ff6b81; text-decoration: none; }
+.donation-small a:hover { text-decoration: underline; }
+
+@media (max-width: 768px) {
+    #game-container { padding: 10px; }
+    .main-content { gap: 15px; }
+    #chessboard { width: 95vw; height: 95vw; max-width: none; max-height: none; }
+    .ui-panel { width: 100%; flex: none; }
+}

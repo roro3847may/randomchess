@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roulette Chess Multiplayer</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <div id="lobby-container">
+        <h1>Roulette Chess</h1>
+        <div class="lobby-controls">
+            <button id="btn-create-room">Create Private Room</button>
+            <div class="join-section">
+                <input type="text" id="input-room-code" placeholder="Enter Room Code" maxlength="4">
+                <button id="btn-join-room">Join Room</button>
+            </div>
+            <p id="lobby-error" class="error"></p>
+        </div>
+        <div class="donation">
+            <p>Support this project to keep the servers running!</p>
+            <a href="#" target="_blank" class="donate-btn">Donate ❤️</a>
+        </div>
+    </div>
+
+    <div id="game-container" style="display: none;">
+        <div class="header">
+            <h2>Room: <span id="display-room-code"></span> | You are: <span id="display-color"></span></h2>
+        </div>
+        
+        <div class="main-content">
+            <div class="board-wrapper">
+                <div id="chessboard"></div>
+            </div>
+            
+            <div class="ui-panel">
+                <div class="turn-indicator">
+                    <h3>Turn: <span id="turn-text">WHITE</span></h3>
+                </div>
+                
+                <button id="btn-spin" class="btn-spin">SPIN ROULETTE</button>
+                
+                <div class="roulette-slots">
+                    <div class="slot" id="slot-0">?</div>
+                    <div class="slot" id="slot-1">?</div>
+                    <div class="slot" id="slot-2">?</div>
+                </div>
+                
+                <div class="status-msg" id="status-msg">Spin Roulette First!</div>
+                
+                <div id="promotion-panel" style="display: none;">
+                    <h4>Select Promotion:</h4>
+                    <div class="promo-buttons">
+                        <button class="btn-promo" data-type="Queen">Q</button>
+                        <button class="btn-promo" data-type="Rook">R</button>
+                        <button class="btn-promo" data-type="Bishop">B</button>
+                        <button class="btn-promo" data-type="Knight">N</button>
+                    </div>
+                </div>
+
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages"></div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Message...">
+                        <button id="btn-send-chat">Send</button>
+                    </div>
+                </div>
+                
+                <div class="donation-small">
+                    <a href="#" target="_blank">Donate to support server costs ❤️</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="client.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "randomchess",
+  "version": "1.0.0",
+  "description": "Roulette Chess - A chess variant with random piece selection and multiplayer rooms.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}
