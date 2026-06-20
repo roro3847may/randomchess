@@ -34,21 +34,108 @@ let myColor = null;
 let gameState = null;
 let legalMoves = [];
 let selectedSquare = null;
+let isAnimatingRoulette = false;
 
 // Audio Context for synthetic sounds
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playTone(freq, type, duration) {
-    if(audioCtx.state === 'suspended') audioCtx.resume();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = type;
-    osc.frequency.value = freq;
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
-    osc.stop(audioCtx.currentTime + duration);
+    try {
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        osc.type = type;
+        osc.frequency.value = freq;
+        
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        osc.start();
+        
+        // Correctly set initial gain before scheduling the exponential ramp
+        gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        
+        osc.stop(audioCtx.currentTime + duration);
+    } catch (e) {
+        console.warn("Audio playback failed:", e);
+    }
 }
+
+// Roulette spin animation logic
+function animateSlot(slotIdx, finalValue, duration, onComplete) {
+    const slot = slots[slotIdx];
+    const pieces = ['Pawn', 'Knight', 'Bishop', 'Rook', 'Queen'];
+    let currentDelay = 40; // Starts fast (40ms ticks)
+    const startTime = Date.now();
+    
+    function tick() {
+        const elapsed = Date.now() - startTime;
+        
+        if (elapsed >= duration) {
+            // Settled on final result
+            slot.innerText = finalValue === 'Knight' ? 'N' : finalValue[0] || '?';
+            slot.classList.remove('spinning');
+            slot.classList.add('reveal-pop');
+            sounds.click(); // Play final confirmation tick
+            onComplete();
+        } else {
+            // Cycle pieces rapidly
+            const currentText = slot.innerText;
+            let randomPiece = pieces[Math.floor(Math.random() * pieces.length)];
+            let randomText = randomPiece === 'Knight' ? 'N' : randomPiece[0];
+            
+            // Avoid repeating the same letter on consecutive frames if possible
+            if (randomText === currentText) {
+                randomPiece = pieces[(pieces.indexOf(randomPiece) + 1) % pieces.length];
+                randomText = randomPiece === 'Knight' ? 'N' : randomPiece[0];
+            }
+            
+            slot.innerText = randomText;
+            slot.classList.add('spinning');
+            
+            // Play spinning tick sound
+            sounds.click();
+            
+            // Decelerate smoothly
+            currentDelay = Math.min(300, currentDelay * 1.12 + 5);
+            setTimeout(tick, currentDelay);
+        }
+    }
+    
+    tick();
+}
+
+function runRouletteAnimation() {
+    isAnimatingRoulette = true;
+    btnSpin.disabled = true;
+    
+    // Reset classes and stop selecting/pop highlights
+    slots.forEach(slot => {
+        slot.classList.remove('selected', 'reveal-pop');
+        slot.style.borderColor = '';
+    });
+
+    let completedSlots = 0;
+    const finalResults = gameState.rouletteResults;
+
+    for (let i = 0; i < 3; i++) {
+        const finalVal = finalResults[i];
+        // Staggered durations: Slot 0: 800ms, Slot 1: 1400ms, Slot 2: 2000ms
+        const duration = 800 + i * 600;
+        
+        animateSlot(i, finalVal, duration, () => {
+            completedSlots++;
+            if (completedSlots === 3) {
+                isAnimatingRoulette = false;
+                renderBoard();
+            }
+        });
+    }
+}
+
 const sounds = {
     spin: () => playTone(600, 'sine', 0.1),
     click: () => playTone(800, 'sine', 0.05),
@@ -138,14 +225,24 @@ function renderBoard() {
     turnText.style.color = gameState.currentTurn === 'W' ? '#fff' : '#000';
     
     // Update Slots
-    for (let i = 0; i < 3; i++) {
-        slots[i].innerText = gameState.rouletteResults[i] === 'Knight' ? 'N' : gameState.rouletteResults[i][0] || '?';
-        slots[i].className = 'slot';
-        if (gameState.selectedRouletteIdx === i) slots[i].classList.add('selected');
-        if (gameState.triplePawnBonus) slots[i].style.borderColor = '#ff4646';
+    if (!isAnimatingRoulette) {
+        for (let i = 0; i < 3; i++) {
+            slots[i].innerText = gameState.rouletteResults[i] === 'Knight' ? 'N' : gameState.rouletteResults[i][0] || '?';
+            
+            const hadRevealPop = slots[i].classList.contains('reveal-pop');
+            slots[i].className = 'slot';
+            if (hadRevealPop) slots[i].classList.add('reveal-pop');
+            
+            if (gameState.selectedRouletteIdx === i) slots[i].classList.add('selected');
+            if (gameState.triplePawnBonus) {
+                slots[i].style.borderColor = '#ff4646';
+            } else {
+                slots[i].style.borderColor = '';
+            }
+        }
     }
 
-    btnSpin.disabled = gameState.hasSpun || gameState.currentTurn !== myColor || gameState.gameOver;
+    btnSpin.disabled = gameState.hasSpun || gameState.currentTurn !== myColor || gameState.gameOver || isAnimatingRoulette;
     
     statusMsg.innerText = gameState.statusMsg;
     statusMsg.style.color = gameState.triplePawnBonus ? '#ff4646' : 
@@ -156,6 +253,7 @@ function renderBoard() {
 }
 
 function onSquareClick(r, c) {
+    if (isAnimatingRoulette) return;
     if (!gameState || gameState.currentTurn !== myColor || gameState.gameOver) return;
 
     if (gameState.awaitingPromotion) return;
@@ -217,11 +315,13 @@ btnJoin.addEventListener('click', () => {
 });
 
 btnSpin.addEventListener('click', () => {
+    if (isAnimatingRoulette) return;
     socket.emit('action', { code: roomCode, action: 'spin' });
 });
 
 slots.forEach((slot, i) => {
     slot.addEventListener('click', () => {
+        if (isAnimatingRoulette) return;
         if (gameState && gameState.currentTurn === myColor && gameState.hasSpun) {
             socket.emit('action', { code: roomCode, action: 'selectRoulette', payload: { idx: i } });
             selectedSquare = null;
@@ -276,12 +376,20 @@ socket.on('roomJoined', (data) => {
 });
 
 socket.on('gameState', (state) => {
+    // A spin occurred if the previous gameState was active, and hasSpun went from false to true
+    const spinOccurred = (gameState && !gameState.hasSpun && state.hasSpun);
+    
     gameState = state;
     if (gameState.currentTurn !== myColor || gameState.selectedRouletteIdx === null) {
         selectedSquare = null;
         legalMoves = [];
     }
-    renderBoard();
+    
+    if (spinOccurred) {
+        runRouletteAnimation();
+    } else {
+        renderBoard();
+    }
 });
 
 socket.on('legalMoves', (moves) => {
