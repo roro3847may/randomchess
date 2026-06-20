@@ -20,7 +20,7 @@
         </div>
         <div class="donation">
             <p>Support this project to keep the servers running!</p>
-            <a href="https://qr.kakaopay.com/FGpJraB6d1f407615" target="_blank" class="donate-btn">Donate ❤️</a>
+            <button class="donate-btn" id="btn-lobby-donate">Donate ❤️</button>
         </div>
     </div>
 
@@ -68,8 +68,20 @@
                 </div>
                 
                 <div class="donation-small">
-                    <a href="https://qr.kakaopay.com/FGpJraB6d1f407615" target="_blank">Donate to support server costs ❤️</a>
+                    <button class="btn-link" id="btn-game-donate">Donate to support server costs ❤️</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donation Modal -->
+    <div id="donate-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal" id="close-modal">&times;</span>
+            <h2>Support Roulette Chess! ❤️</h2>
+            <p>Scan the QR code below to donate and help cover server costs.</p>
+            <div class="qr-container">
+                <img src="donateQR.png" alt="Donate QR Code" id="donate-qr-img">
             </div>
         </div>
     </div>
